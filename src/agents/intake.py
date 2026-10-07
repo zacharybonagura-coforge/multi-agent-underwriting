@@ -1,15 +1,14 @@
 """Intake agent: normalize a raw insurance application."""
 
-import json
 from dataclasses import dataclass
 from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any, Literal
 
-from pydantic import BaseModel, ValidationError, field_validator
+from pydantic import BaseModel, field_validator
 
+from agents.model_io import parse_message, render_prompt
 from model.base import ModelAdapter
-from prompts.repository import render
 
 Product = Literal["auto", "home", "life"]
 
@@ -70,26 +69,10 @@ class IntakeResult:
 
 
 
-def _prompt(raw_application: dict[str, Any]) -> str:
-    payload = json.dumps(raw_application, default=str)
-    return render("intake.v1.md", payload=payload)
-
-
-def _parse(text: str) -> IntakeMessage:
-    start = text.find("{")
-    end = text.rfind("}")
-    if start == -1 or end == -1:
-        raise ValueError("intake model returned no JSON object")
-    try:
-        return IntakeMessage.model_validate_json(text[start : end + 1])
-    except ValidationError as exc:
-        raise ValueError("intake model returned an unusable response") from exc
-
-
 def intake_agent(raw_application: dict[str, Any], model: ModelAdapter) -> IntakeResult:
     """Normalize ``raw_application`` with one model call."""
-    generation = model.generate(_prompt(raw_application))
-    message = _parse(generation.text)
+    generation = model.generate(render_prompt("intake.v1.md", raw_application))
+    message = parse_message(generation.text, IntakeMessage, "intake")
     missing = [name for name in FIELDS if getattr(message, name) is None]
     return IntakeResult(
         message=message,
