@@ -1,0 +1,16 @@
+[
+    {
+      "applicant_name": "Ada Lovelace",
+      "product": "auto",
+      "credit_file": "good",
+      "claims": ["2019 collision"],
+      "asset": "2018 Honda Civic"
+    },
+    {
+      "applicant_name": "Ada Lovelace",
+      "product": "home",
+      "credit_file": "good",
+      "claims": [],
+      "asset": "12 St James Square, brick house"
+    }
+  ]
