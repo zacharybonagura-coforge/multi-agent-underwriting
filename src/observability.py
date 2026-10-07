@@ -9,7 +9,11 @@ from typing import Any
 from opentelemetry import trace
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import ReadableSpan, TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor, SpanExporter, SpanExportResult
+from opentelemetry.sdk.trace.export import (
+    SimpleSpanProcessor,
+    SpanExporter,
+    SpanExportResult,
+)
 
 logger = logging.getLogger("underwriting")
 
@@ -38,7 +42,7 @@ class LoggingSpanExporter(SpanExporter):
 
     def shutdown(self) -> None:
         """None here since we do not need close any file or network client"""
-        return None
+        return
 
 
 def configure_tracing() -> trace.Tracer:

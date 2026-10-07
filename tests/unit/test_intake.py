@@ -2,7 +2,7 @@
 
 import json
 from datetime import date
-from decimal import Decimal, InvalidOperation
+from decimal import InvalidOperation
 
 import pytest
 
