@@ -18,9 +18,9 @@ _STORE = JsonStore(Path(__file__).resolve().parents[2] / "data" / "applicants.js
 class EnrichmentMessage(BaseModel):
     """Facts the orchestrator passes to risk scoring."""
 
-    credit_band: CreditBand | None
-    prior_claims_count: int | None
-    asset_facts: str | None
+    credit_band: CreditBand | None = None
+    prior_claims_count: int | None = None
+    asset_facts: str | None = None
 
     @field_validator("credit_band", mode="before")
     @classmethod
