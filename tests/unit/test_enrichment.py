@@ -114,7 +114,7 @@ def test_enrichment_normalizes_credit_band(band: str) -> None:
 
 
 @pytest.mark.parametrize("count", [0, "2", 3.0])
-def test_enrichment_accepts_a_whole_claims_count(count: int | str | float) -> None:
+def test_enrichment_accepts_a_whole_claims_count(count: str | float) -> None:
     result = enrichment_agent(_lookup(), FakeModel(json.dumps(_facts(prior_claims_count=count))))
     assert result.message.prior_claims_count == int(count)
 
@@ -153,6 +153,8 @@ def test_broken_json_raises() -> None:
         enrichment_agent(_lookup(), FakeModel("{not json}"))
 
 
-def test_omitted_fields_raise() -> None:
-    with pytest.raises(ValueError, match="unusable response"):
-        enrichment_agent(_lookup(), FakeModel("{}"))
+def test_omitted_fields_are_null() -> None:
+    result = enrichment_agent(_lookup(), FakeModel("{}"))
+    assert result.message.credit_band is None
+    assert result.message.prior_claims_count is None
+    assert result.message.asset_facts is None
