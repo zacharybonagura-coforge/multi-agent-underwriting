@@ -6,14 +6,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from model.base import ModelAdapter
-from model.ollama import OllamaAdapter
 from observability import configure_tracing
 from pipeline import PipelineResult, run
-
-ROOT = Path(__file__).resolve().parents[1]
-RUNS = ROOT / "runs"
-LOGS = ROOT / "logs"
+from settings.config import Settings
+from settings.factory import build_model, build_store
 
 APPLICATIONS = [
     ("ada-lovelace-auto", {"applicant_name": "Ada Lovelace", "date_of_birth": "1815/12/10", "address": "12 St James Square, London", "product": "  AUTO  ", "coverage_amount": "16000.456", "stated_income": "120000"}),
@@ -124,10 +120,12 @@ def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     path.write_text("".join(json.dumps(row) + "\n" for row in rows))
 
 
-def main(model: ModelAdapter) -> None:
+def main() -> None:
     """Run the three applications and write one timestamped JSONL in each folder."""
-    RUNS.mkdir(exist_ok=True)
-    LOGS.mkdir(exist_ok=True)
+    settings = Settings.from_env()
+    settings.runs_dir.mkdir(exist_ok=True)
+    settings.logs_dir.mkdir(exist_ok=True)
+
     tracer = configure_tracing()
     underwriting = logging.getLogger("underwriting")
     run_rows: list[dict[str, Any]] = []
@@ -136,15 +134,15 @@ def main(model: ModelAdapter) -> None:
         capture = _TraceCapture()
         underwriting.addHandler(capture)
         try:
-            result = run(application, model, tracer)
+            result = run(application, build_model(settings), build_store(settings), tracer)
         finally:
             underwriting.removeHandler(capture)
         run_rows.append(_result_record(name, result))
         log_rows.append(_log_record(name, capture.agents, result.final_decision))
     stamp = datetime.now(UTC).strftime("%Y-%m-%dT%H-%M-%S")
-    _write_jsonl(RUNS / f"{stamp}.jsonl", run_rows)
-    _write_jsonl(LOGS / f"{stamp}.jsonl", log_rows)
+    _write_jsonl(settings.runs_dir / f"{stamp}.jsonl", run_rows)
+    _write_jsonl(settings.logs_dir / f"{stamp}.jsonl", log_rows)
 
 
 if __name__ == "__main__":
-    main(OllamaAdapter())
+    main()

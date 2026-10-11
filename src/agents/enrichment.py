@@ -1,7 +1,6 @@
 """Enrichment agent: add credit, claims, and asset facts."""
 
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any, Literal
 
 from pydantic import BaseModel, field_validator
@@ -9,11 +8,9 @@ from pydantic import BaseModel, field_validator
 from agents.model_io import parse_message, render_prompt
 from model.base import ModelAdapter
 from store.base import Store
-from store.json import JsonStore
 
 CreditBand = Literal["excellent", "good", "fair", "poor"]
 BANDS = ("excellent", "good", "fair", "poor")
-_STORE = JsonStore(Path(__file__).resolve().parents[2] / "data" / "applicants.json")
 
 class EnrichmentMessage(BaseModel):
     """Facts the orchestrator passes to risk scoring."""
@@ -70,7 +67,7 @@ class EnrichmentResult:
 def lookup_applicant(
     name: str | None,
     product: str | None,
-    store: Store = _STORE,
+    store: Store
 ) -> dict[str, Any] | None:
     """Return the stored record for this name and product."""
     if name is None or product is None:
@@ -81,9 +78,9 @@ def lookup_applicant(
     return None
 
 
-def enrichment_agent(lookup: dict[str, Any], model: ModelAdapter) -> EnrichmentResult:
+def enrichment_agent(lookup: dict[str, Any], model: ModelAdapter, store: Store) -> EnrichmentResult:
     """Add credit, claims, and asset facts from the applicant store."""
-    records = lookup_applicant(lookup.get("applicant_name"), lookup.get("product"))
+    records = lookup_applicant(lookup.get("applicant_name"), lookup.get("product"), store)
     generation = model.generate(
         render_prompt("enrichment.v1.md", {**lookup, "records": records})
     )

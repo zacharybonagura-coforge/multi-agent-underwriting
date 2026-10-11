@@ -6,7 +6,6 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import InvalidOperation
-from pathlib import Path
 from typing import Any, Protocol
 
 import httpx
@@ -18,9 +17,12 @@ from agents.recommendation import RecommendationResult, recommendation_agent
 from agents.risk import RiskResult, risk_agent
 from model.base import Generation, ModelAdapter, ModelTimeoutError
 from observability import configure_tracing
+from settings.config import Settings
+from store.base import Store
 
-MAX_RETRIES = 3
-_REVIEW_FILE = Path(__file__).resolve().parents[1] / "reviews" / "human-review.jsonl"
+settings = Settings.from_env()
+_MAX_RETRIES = settings.max_retries
+_REVIEW_FILE = settings.reviews_path
 
 @dataclass(frozen=True)
 class PipelineResult:
@@ -61,6 +63,7 @@ class _ErrorPrompt:
 def run(
     raw_application: dict[str, Any],
     model: ModelAdapter,
+    store: Store,
     tracer: trace.Tracer | None = None,
 ) -> PipelineResult:
     """Run intake, enrichment, risk scoring, and recommendation."""
@@ -86,7 +89,7 @@ def run(
             wrapped,
             "enrichment",
             enrich_input,
-            lambda: enrichment_agent(enrich_input, wrapped),
+            lambda: enrichment_agent(enrich_input, wrapped, store),
             lambda result: result.message.model_dump(mode="json"),
         )
         if enrichment is None:
@@ -155,12 +158,12 @@ def _run_agent[ResultT: _TracedResult](
     output_of: Callable[[ResultT], Any],
 ) -> ResultT | None:
     """Call ``agent`` once, then retry up to three times with the previous error appended."""
-    for attempt in range(MAX_RETRIES+1):
+    for attempt in range(_MAX_RETRIES+1):
         try:
             return _traced_call(tracer, agent, received, call, output_of)
         except _AGENT_ERRORS as exc:
-            if attempt == 3:
-                print(f"{agent} failed after 3 retries. This application must go to human review.")
+            if attempt == _MAX_RETRIES:
+                print(f"{agent} failed after {_MAX_RETRIES} retries. This application must go to human review.")
                 return None
             model.remember(exc)
     return None
@@ -273,27 +276,3 @@ def _enrichment_failed(message: EnrichmentMessage) -> bool:
         or message.prior_claims_count is None
         or message.asset_facts is None
     )
-
-
-if __name__ == "__main__":
-    from model.ollama import OllamaAdapter
-
-    application = {
-        "applicant_name": "Ada Lovelace",
-        "date_of_birth": "1815-12-10",
-        "address": "12 St James Square, London",
-        "product": "AUTO",
-        "coverage_amount": "50000",
-        "stated_income": "120000",
-    }
-    result = run(application, OllamaAdapter())
-    if result.intake is not None:
-        print(result.intake.message.model_dump(mode="json"))
-        print("missing:", result.intake.missing_fields)
-    if result.enrichment is not None:
-        print(result.enrichment.message.model_dump(mode="json"))
-    if result.risk is not None:
-        print(result.risk.message.model_dump(mode="json"))
-    if result.recommendation is not None:
-        print(result.recommendation.message.model_dump(mode="json"))
-    print("final_decision:", result.final_decision)

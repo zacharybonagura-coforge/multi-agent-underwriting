@@ -1,17 +1,18 @@
 """Show a risk-scoring timeout: one retry, then escalate."""
 
-from model.base import Generation, ModelTimeoutError
-from model.ollama import OllamaAdapter
+from model.base import Generation, ModelAdapter, ModelTimeoutError
 from pipeline import run
+from settings.config import Settings
+from settings.factory import build_model, build_store
 
 
 class TimeoutOnRisk:
     """Call Ollama for every agent except risk scoring."""
 
-    def __init__(self) -> None:
-        self._ollama = OllamaAdapter()
-        self.provider = self._ollama.provider
-        self.model_id = self._ollama.model_id
+    def __init__(self, model: ModelAdapter) -> None:
+        self._ollama = model
+        self.provider = model.provider
+        self.model_id = model.model_id
         self.prompts: list[str] = []
 
     def generate(self, prompt: str) -> Generation:
@@ -22,7 +23,8 @@ class TimeoutOnRisk:
 
 
 def main() -> None:
-    model = TimeoutOnRisk()
+    settings = Settings.from_env()
+    model = TimeoutOnRisk(build_model(settings))
     result = run(
         {
             "applicant_name": "Ada Lovelace",
@@ -33,6 +35,7 @@ def main() -> None:
             "stated_income": "120000",
         },
         model,
+        build_store(settings)
     )
     risk_prompts = [prompt for prompt in model.prompts if prompt.startswith("Score this")]
     print("--- risk calls:", len(risk_prompts))

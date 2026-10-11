@@ -39,6 +39,17 @@ class MemoryStore:
         return None
 
 
+def _store() -> MemoryStore:
+    return MemoryStore([
+        {
+            "applicant_name": "Ada Lovelace",
+            "product": "auto",
+            "credit_file": "good",
+            "claims": ["2019 collision"],
+            "asset": "2018 Honda Civic",
+        }
+    ])
+
 def _facts(**overrides: object) -> dict[str, object]:
     payload: dict[str, object] = {
         "credit_band": "good",
@@ -86,7 +97,7 @@ def test_lookup_returns_none_without_a_key(name: str | None, product: str | None
 
 def test_enrichment_reads_a_complete_reply() -> None:
     model = FakeModel(json.dumps(_facts()))
-    result = enrichment_agent(_lookup(), model)
+    result = enrichment_agent(_lookup(), model, _store())
     assert result.message.credit_band == "good"
     assert result.message.prior_claims_count == 1
     assert result.message.asset_facts == "2018 Honda Civic"
@@ -103,58 +114,58 @@ def test_enrichment_puts_null_records_in_the_prompt_for_an_unknown_applicant() -
         prior_claims_count=None,
         asset_facts=None,
     )))
-    enrichment_agent(_lookup(applicant_name="Unknown Person"), model)
+    enrichment_agent(_lookup(applicant_name="Unknown Person"), model, _store())
     assert '"records": null' in model.prompts[0]
 
 
 @pytest.mark.parametrize("band", ["excellent", "GOOD", "  fair  ", "poor"])
 def test_enrichment_normalizes_credit_band(band: str) -> None:
-    result = enrichment_agent(_lookup(), FakeModel(json.dumps(_facts(credit_band=band))))
+    result = enrichment_agent(_lookup(), FakeModel(json.dumps(_facts(credit_band=band))), _store())
     assert result.message.credit_band == band.strip().lower()
 
 
 @pytest.mark.parametrize("count", [0, "2", 3.0])
 def test_enrichment_accepts_a_whole_claims_count(count: str | float) -> None:
-    result = enrichment_agent(_lookup(), FakeModel(json.dumps(_facts(prior_claims_count=count))))
+    result = enrichment_agent(_lookup(), FakeModel(json.dumps(_facts(prior_claims_count=count))), _store())
     assert result.message.prior_claims_count == int(count)
 
 
 def test_enrichment_reads_json_wrapped_in_prose() -> None:
     text = "Facts:\n" + json.dumps(_facts()) + "\nDone."
-    result = enrichment_agent(_lookup(), FakeModel(text))
+    result = enrichment_agent(_lookup(), FakeModel(text), _store())
     assert result.message.asset_facts == "2018 Honda Civic"
 
 
 @pytest.mark.parametrize("band", ["prime", "", "   ", 12])
 def test_unusable_credit_band_becomes_null(band: object) -> None:
-    result = enrichment_agent(_lookup(), FakeModel(json.dumps(_facts(credit_band=band))))
+    result = enrichment_agent(_lookup(), FakeModel(json.dumps(_facts(credit_band=band))), _store())
     assert result.message.credit_band is None
 
 
 @pytest.mark.parametrize("count", ["hi", -1, 2.5, True, ""])
 def test_unusable_claims_count_becomes_null(count: object) -> None:
-    result = enrichment_agent(_lookup(), FakeModel(json.dumps(_facts(prior_claims_count=count))))
+    result = enrichment_agent(_lookup(), FakeModel(json.dumps(_facts(prior_claims_count=count))), _store())
     assert result.message.prior_claims_count is None
 
 
 @pytest.mark.parametrize("asset", ["", "   "])
 def test_blank_asset_facts_become_null(asset: str) -> None:
-    result = enrichment_agent(_lookup(), FakeModel(json.dumps(_facts(asset_facts=asset))))
+    result = enrichment_agent(_lookup(), FakeModel(json.dumps(_facts(asset_facts=asset))), _store())
     assert result.message.asset_facts is None
 
 
 def test_model_text_without_json_raises() -> None:
     with pytest.raises(ValueError, match="no JSON object"):
-        enrichment_agent(_lookup(), FakeModel("I could not enrich this applicant."))
+        enrichment_agent(_lookup(), FakeModel("I could not enrich this applicant."), _store())
 
 
 def test_broken_json_raises() -> None:
     with pytest.raises(ValueError, match="unusable response"):
-        enrichment_agent(_lookup(), FakeModel("{not json}"))
+        enrichment_agent(_lookup(), FakeModel("{not json}"), _store())
 
 
 def test_omitted_fields_are_null() -> None:
-    result = enrichment_agent(_lookup(), FakeModel("{}"))
+    result = enrichment_agent(_lookup(), FakeModel("{}"), _store())
     assert result.message.credit_band is None
     assert result.message.prior_claims_count is None
     assert result.message.asset_facts is None
