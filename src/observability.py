@@ -48,6 +48,7 @@ class LoggingSpanExporter(SpanExporter):
 def configure_tracing() -> trace.Tracer:
     """Print each finished span to the terminal."""
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+    logger.setLevel(logging.INFO)
     provider = TracerProvider(resource=Resource.create({"service.name": "underwriting"}))
     provider.add_span_processor(SimpleSpanProcessor(LoggingSpanExporter()))
     trace.set_tracer_provider(provider)
