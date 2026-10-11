@@ -1,4 +1,4 @@
-"""Show a risk-scoring timeout: one retry, then escalate."""
+"""Show a risk-scoring timeout: retries, then escalate."""
 
 from model.base import Generation, ModelAdapter, ModelTimeoutError
 from pipeline import run
