@@ -1,16 +1,197 @@
 [
-    {
-      "applicant_name": "Ada Lovelace",
-      "product": "auto",
-      "credit_file": "good",
-      "claims": ["2019 collision"],
-      "asset": "2018 Honda Civic"
-    },
-    {
-      "applicant_name": "Ada Lovelace",
-      "product": "home",
-      "credit_file": "good",
-      "claims": [],
-      "asset": "12 St James Square, brick house"
-    }
-  ]
+  {
+    "applicant_name": "Ada Lovelace",
+    "product": "auto",
+    "credit_file": "good",
+    "claims": ["2019-04-12 collision: rear-ended at a traffic light, $4,200 paid, not at fault"],
+    "asset": "2018 Honda Civic LX sedan, 42,000 miles, garaged, personal use"
+  },
+  {
+    "applicant_name": "Ada Lovelace",
+    "product": "home",
+    "credit_file": "good",
+    "claims": [],
+    "asset": "brick townhouse, built 1820, about 2,400 sq ft, owner occupied, replacement cost about $350,000"
+  },
+  {
+    "applicant_name": "Katherine Johnson",
+    "product": "auto",
+    "credit_file": "excellent",
+    "claims": [],
+    "asset": "2020 Toyota Camry LE sedan, 28,000 miles, garaged, commute use"
+  },
+  {
+    "applicant_name": "Katherine Johnson",
+    "product": "home",
+    "credit_file": "good",
+    "claims": [],
+    "asset": "single-story brick ranch, built 1965, about 1,600 sq ft, owner occupied, replacement cost about $280,000"
+  },
+  {
+    "applicant_name": "Margaret Hamilton",
+    "product": "life",
+    "credit_file": "excellent",
+    "claims": [],
+    "asset": "20-year term life issued 2018, $500,000 face amount, nonsmoker, standard health class"
+  },
+  {
+    "applicant_name": "Alan Turing",
+    "product": "auto",
+    "credit_file": "fair",
+    "claims": [
+      "2018-11-03 collision: struck a parked car, $6,800 paid, at fault",
+      "2021-02-19 comprehensive: hail damage to hood and roof, $2,150 paid"
+    ],
+    "asset": "2009 Volkswagen Golf hatchback, 118,000 miles, street parked, personal use"
+  },
+  {
+    "applicant_name": "Alan Turing",
+    "product": "home",
+    "credit_file": "poor",
+    "claims": ["2020-08-14 water damage: flooded basement after heavy rain, $22,000 paid, house is in a flood zone"],
+    "asset": "wood-frame house, built 1938, about 1,800 sq ft, unfinished basement, replacement cost about $260,000"
+  },
+  {
+    "applicant_name": "Dorothy Vaughan",
+    "product": "life",
+    "credit_file": "good",
+    "claims": [],
+    "asset": "whole life policy issued 2004, $200,000 face amount, nonsmoker, premiums current"
+  },
+  {
+    "applicant_name": "Hedy Lamarr",
+    "product": "auto",
+    "credit_file": "good",
+    "claims": ["2022-07-30 collision: parking-lot impact, $3,600 paid, at fault"],
+    "asset": "2015 Audi A4 sedan, 61,000 miles, garaged, personal use"
+  },
+  {
+    "applicant_name": "Hedy Lamarr",
+    "product": "home",
+    "credit_file": "excellent",
+    "claims": [],
+    "asset": "brick house, built 1952, about 3,200 sq ft, owner occupied, replacement cost about $900,000"
+  },
+  {
+    "applicant_name": "Grace Hopper",
+    "product": "auto",
+    "credit_file": "good",
+    "claims": [],
+    "asset": "2016 Subaru Outback wagon, 74,000 miles, garaged, commute use"
+  },
+  {
+    "applicant_name": "John von Neumann",
+    "product": "life",
+    "credit_file": "fair",
+    "claims": [
+      "2017-05-02 hospital stay: cardiac admission, claim paid",
+      "2019-09-18 hospital stay: follow-up cardiac admission, claim paid"
+    ],
+    "asset": "20-year term life issued 2015, $1,000,000 face amount, smoker, rated health class"
+  },
+  {
+    "applicant_name": "John von Neumann",
+    "product": "home",
+    "credit_file": "poor",
+    "claims": [
+      "2016-01-22 fire: kitchen fire, $48,000 paid",
+      "2018-10-09 theft: burglary of electronics, $7,500 paid",
+      "2021-03-27 water damage: burst pipe on the second floor, $19,000 paid"
+    ],
+    "asset": "wood-frame house, built 1924, about 2,600 sq ft, older wiring, replacement cost about $750,000"
+  },
+  {
+    "applicant_name": "Mary Jackson",
+    "product": "auto",
+    "credit_file": "excellent",
+    "claims": [],
+    "asset": "2022 Honda Accord EX sedan, 16,000 miles, garaged, commute use"
+  },
+  {
+    "applicant_name": "Mary Jackson",
+    "product": "life",
+    "credit_file": "good",
+    "claims": [],
+    "asset": "15-year term life issued 2021, $300,000 face amount, nonsmoker, preferred health class"
+  },
+  {
+    "applicant_name": "Claude Shannon",
+    "product": "home",
+    "credit_file": "good",
+    "claims": ["2019-09-06 wind damage: fallen tree on the roof, $11,400 paid"],
+    "asset": "brick colonial, built 1948, about 2,200 sq ft, owner occupied, replacement cost about $400,000"
+  },
+  {
+    "applicant_name": "Claude Shannon",
+    "product": "auto",
+    "credit_file": "fair",
+    "claims": [
+      "2018-06-15 collision: intersection impact, $5,100 paid, at fault",
+      "2020-12-01 collision: rear-ended another driver, $8,900 paid, at fault"
+    ],
+    "asset": ["2019 Subaru Outback Limited, 47,000 miles, garaged", "2012 Ford F-150 XLT, 132,000 miles, driveway parked"]
+  },
+  {
+    "applicant_name": "Radia Perlman",
+    "product": "life",
+    "credit_file": "excellent",
+    "claims": [],
+    "asset": "20-year term life issued 2019, $400,000 face amount, nonsmoker, preferred health class"
+  },
+  {
+    "applicant_name": "Barbara Liskov",
+    "product": "auto",
+    "credit_file": "good",
+    "claims": ["2020-05-19 collision: low-speed rear impact, $2,800 paid, not at fault"],
+    "asset": "2017 Honda Civic EX sedan, 54,000 miles, garaged, personal use"
+  },
+  {
+    "applicant_name": "Barbara Liskov",
+    "product": "home",
+    "credit_file": "excellent",
+    "claims": ["2019-10-17 wind damage: shingles torn off during a storm, $6,300 paid"],
+    "asset": "brick house, built 1910, about 2,100 sq ft, owner occupied, replacement cost about $400,000"
+  },
+  {
+    "applicant_name": "Leslie Lamport",
+    "product": "home",
+    "credit_file": "good",
+    "claims": ["2021-01-11 water damage: supply line leak under the kitchen sink, $9,700 paid"],
+    "asset": "single-story brick ranch, built 1972, about 1,700 sq ft, owner occupied, replacement cost about $320,000"
+  },
+  {
+    "applicant_name": "Frances Allen",
+    "product": "auto",
+    "credit_file": "fair",
+    "claims": ["2021-08-22 comprehensive: broken windshield from road debris, $780 paid"],
+    "asset": "2014 Toyota Corolla LE sedan, 96,000 miles, street parked, commute use"
+  },
+  {
+    "applicant_name": "Tim Berners-Lee",
+    "product": "auto",
+    "credit_file": "prime",
+    "claims": [],
+    "asset": "2011 Volkswagen Golf hatchback, 89,000 miles, garaged, personal use"
+  },
+  {
+    "applicant_name": "Vint Cerf",
+    "product": "home",
+    "credit_file": "good",
+    "claims": "2019-06-02 water damage: burst supply line in the bathroom, $18,400 paid",
+    "asset": "two-story brick house, built 1986, about 2,800 sq ft, replacement cost about $500,000"
+  },
+  {
+    "applicant_name": "Bob Kahn",
+    "product": "life",
+    "credit_file": "excellent",
+    "claims": [],
+    "asset": ""
+  },
+  {
+    "applicant_name": "Donald Knuth",
+    "product": "auto",
+    "credit_file": "unknown",
+    "claims": null,
+    "asset": null
+  }
+]
