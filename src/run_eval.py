@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from model.base import ModelAdapter
 from model.ollama import OllamaAdapter
 from observability import configure_tracing
 from pipeline import PipelineResult, run
@@ -125,12 +126,11 @@ def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     path.write_text("".join(json.dumps(row) + "\n" for row in rows))
 
 
-def main() -> None:
+def main(model: ModelAdapter) -> None:
     """Run the three applications and write one timestamped JSONL in each folder."""
     RUNS.mkdir(exist_ok=True)
     LOGS.mkdir(exist_ok=True)
     tracer = configure_tracing()
-    model = OllamaAdapter()
     underwriting = logging.getLogger("underwriting")
     run_rows: list[dict[str, Any]] = []
     log_rows: list[dict[str, Any]] = []
@@ -149,4 +149,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    main(OllamaAdapter())
