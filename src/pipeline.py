@@ -4,7 +4,9 @@ import json
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from decimal import InvalidOperation
+from pathlib import Path
 from typing import Any, Protocol
 
 import httpx
@@ -17,8 +19,8 @@ from agents.risk import RiskResult, risk_agent
 from model.base import Generation, ModelAdapter, ModelTimeoutError
 from observability import configure_tracing
 
-
 MAX_RETRIES = 3
+_REVIEW_FILE = Path(__file__).resolve().parents[1] / "reviews" / "human-review.jsonl"
 
 @dataclass(frozen=True)
 class PipelineResult:
@@ -77,7 +79,7 @@ def run(
             },
         )
         if intake is None:
-            return _stop()
+            return _review(_stop(), "intake failed after retries")
         enrich_input = _enrichment_input(intake)
         enrichment = _run_agent(
             tracer,
@@ -88,10 +90,10 @@ def run(
             lambda result: result.message.model_dump(mode="json"),
         )
         if enrichment is None:
-            return _stop(intake)
+            return _review(_stop(intake), "enrichment failed after retries")
         if _enrichment_failed(enrichment.message):
             print("Enrichment failed. This application must go to human review.")
-            return _stop(intake, enrichment)
+            return _review(_stop(intake, enrichment), "enrichment record is incomplete")
         risk_input = _risk_input(intake, enrichment)
         risk = _run_agent(
             tracer,
@@ -102,7 +104,7 @@ def run(
             lambda result: result.message.model_dump(mode="json"),
         )
         if risk is None:
-            return _stop(intake, enrichment)
+            return _review(_stop(intake, enrichment), "risk scoring failed after retries")
         recommend_input = _recommendation_input(risk)
         recommendation = _run_agent(
             tracer,
@@ -113,15 +115,22 @@ def run(
             lambda result: result.message.model_dump(mode="json"),
         )
         if recommendation is None:
-            return _stop(intake, enrichment, risk)
-
-        return PipelineResult(
-            final_decision=_final_decision(recommendation),
+            return _review(_stop(intake, enrichment, risk), "recommendation failed after retries")
+        
+        decision = _final_decision(recommendation)
+        result = PipelineResult(
+            final_decision=decision,
             intake=intake,
             enrichment=enrichment,
             risk=risk,
             recommendation=recommendation,
         )
+
+        if decision == "escalate":
+            reason = recommendation.message.rationale or "recommendation did not produce a decision"
+            return _review(result, reason)
+
+        return result
 
 
 class _TracedResult(Protocol):
@@ -182,6 +191,27 @@ def _traced_call[ResultT: _TracedResult](
             return result
         finally:
             span.set_attribute("duration_ms", round((time.perf_counter() - started) * 1000, 3))
+
+
+def _review(result: PipelineResult, reason: str) -> PipelineResult:
+    """Append an escalated case to the human-review file."""
+    _REVIEW_FILE.parent.mkdir(exist_ok=True)
+    intake = None
+    if result.intake is not None:
+        intake = result.intake.message.model_dump(mode="json")
+        intake["missing_fields"] = result.intake.missing_fields
+    record = {
+        "reviewed_at": datetime.now(UTC).isoformat(),
+        "reason": reason,
+        "final_decision": result.final_decision,
+        "intake": intake,
+        "enrichment": None if result.enrichment is None else result.enrichment.message.model_dump(mode="json"),
+        "risk": None if result.risk is None else result.risk.message.model_dump(mode="json"),
+        "recommendation": None if result.recommendation is None else result.recommendation.message.model_dump(mode="json"),
+    }
+    with _REVIEW_FILE.open("a") as review_file:
+        review_file.write(json.dumps(record) + "\n")
+    return result
 
 
 def _stop(

@@ -16,5 +16,6 @@ htmlcov/
 
 runs/
 logs/
+reviews/
 
 .vscode/
