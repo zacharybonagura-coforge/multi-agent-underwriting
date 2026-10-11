@@ -134,3 +134,16 @@ def test_missing_required_field_is_high() -> None:
 def test_null_score_has_null_tier() -> None:
     result = risk_agent(_case(), FakeModel(json.dumps(_score(risk_score=None, tier="high"))))
     assert result.message.tier is None
+
+
+@pytest.mark.parametrize("tier", [12, True, None])
+def test_non_string_tier_is_dropped(tier: object) -> None:
+    result = risk_agent(_case(), FakeModel(json.dumps(_score(risk_score=42, tier=tier))))
+    assert result.message.tier == "medium"
+
+
+@pytest.mark.parametrize("tier", ["prime", "", "   "])
+def test_unknown_tier_is_dropped(tier: str) -> None:
+    result = risk_agent(_case(), FakeModel(json.dumps(_score(risk_score=42, tier=tier))))
+    assert result.message.tier == "medium"
+    
