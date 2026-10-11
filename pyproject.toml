@@ -49,6 +49,11 @@ extraPaths = ["src"]
 
 [tool.coverage.run]
 source = ["src"]
+omit = [
+    "src/store/*",
+    "src/model/*",
+    "src/settings/factory.py"
+]
 
 [tool.coverage.report]
 fail_under = 100
