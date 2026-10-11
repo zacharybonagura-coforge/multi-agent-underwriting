@@ -22,7 +22,7 @@ class TimeoutOnRisk:
         return self._ollama.generate(prompt)
 
 
-def main() -> None:
+def main() -> None:  # pragma: no cover
     settings = Settings.from_env()
     model = TimeoutOnRisk(build_model(settings))
     result = run(
