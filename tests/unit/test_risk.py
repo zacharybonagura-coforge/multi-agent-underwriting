@@ -63,12 +63,6 @@ def test_risk_reads_a_complete_reply() -> None:
     assert "JSON only" in model.prompts[0]
 
 
-@pytest.mark.parametrize("tier", ["low", "MEDIUM", "  high  "])
-def test_risk_normalizes_tier(tier: str) -> None:
-    result = risk_agent(_case(), FakeModel(json.dumps(_score(tier=tier))))
-    assert result.message.tier == tier.strip().lower()
-
-
 @pytest.mark.parametrize("score", [0, "100", 33.5])
 def test_risk_accepts_a_score_from_0_to_100(score: str | float) -> None:
     result = risk_agent(_case(), FakeModel(json.dumps(_score(risk_score=score))))
@@ -85,12 +79,6 @@ def test_risk_reads_json_wrapped_in_prose() -> None:
 def test_unusable_score_becomes_null(score: object) -> None:
     result = risk_agent(_case(), FakeModel(json.dumps(_score(risk_score=score))))
     assert result.message.risk_score is None
-
-
-@pytest.mark.parametrize("tier", ["severe", "", "   ", 1])
-def test_unusable_tier_becomes_null(tier: object) -> None:
-    result = risk_agent(_case(), FakeModel(json.dumps(_score(tier=tier))))
-    assert result.message.tier is None
 
 
 def test_blank_factors_become_an_empty_list() -> None:
@@ -128,3 +116,21 @@ def test_non_numeric_score_becomes_null() -> None:
 def test_non_list_factors_become_an_empty_list() -> None:
     result = risk_agent(_case(), FakeModel(json.dumps(_score(risk_factors=None))))
     assert result.message.risk_factors == []
+
+
+@pytest.mark.parametrize(("score", "tier"), [(0, "low"), (33, "low"), (34, "medium"), (66, "medium"), (67, "high"), (100, "high")])
+def test_tier_comes_from_the_score(score: float, tier: str) -> None:
+    result = risk_agent(_case(), FakeModel(json.dumps(_score(risk_score=score, tier="high"))))
+    assert result.message.tier == tier
+
+
+def test_missing_required_field_is_high() -> None:
+    case = _case()
+    case["stated_income"] = None
+    result = risk_agent(case, FakeModel(json.dumps(_score(risk_score=10, tier="low"))))
+    assert result.message.tier == "high"
+
+
+def test_null_score_has_null_tier() -> None:
+    result = risk_agent(_case(), FakeModel(json.dumps(_score(risk_score=None, tier="high"))))
+    assert result.message.tier is None

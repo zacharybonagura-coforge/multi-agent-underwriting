@@ -71,11 +71,26 @@ class RiskResult:
     output_tokens: int
 
 
+def _tier(score: float | None, case: dict[str, Any]) -> str | None:
+    """Band the score. A missing required field is high."""
+    if any(case.get(field) is None for field in ("product", "coverage_amount", "stated_income", "credit_band")):
+        return "high"
+    if score is None:
+        return None
+    if score < 34:
+        return "low"
+    if score < 67:
+        return "medium"
+    return "high"
+
+
 def risk_agent(case: dict[str, Any], model: ModelAdapter) -> RiskResult:
     """Score ``case`` with one model call."""
     generation = model.generate(render_prompt("risk.v1.md", case))
+    message = parse_message(generation.text, RiskMessage, "risk")
+    message = message.model_copy(update={"tier": _tier(message.risk_score, case)})
     return RiskResult(
-        message=parse_message(generation.text, RiskMessage, "risk"),
+        message=message,
         input_tokens=generation.input_tokens,
         output_tokens=generation.output_tokens,
     )
