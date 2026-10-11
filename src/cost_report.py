@@ -8,8 +8,8 @@ ROOT = Path(__file__).resolve().parents[1]
 LOG = ROOT / "docs" / "eval-run-logs.jsonl"
 OUT = ROOT / "docs" / "cost-latency.md"
 
-INPUT_PER_MILLION = 0.18
-OUTPUT_PER_MILLION = 0.70
+INPUT_PER_MILLION = 0.00
+OUTPUT_PER_MILLION = 0.00
 AGENTS = ("intake", "enrichment", "risk", "recommendation")
 
 
