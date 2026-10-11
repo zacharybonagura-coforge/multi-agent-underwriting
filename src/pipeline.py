@@ -1,6 +1,7 @@
 """Underwriting pipeline. Intake, enrichment, risk scoring, then recommendation."""
 
 import json
+import re
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -19,7 +20,6 @@ from model.base import Generation, ModelAdapter, ModelTimeoutError
 from observability import configure_tracing
 from settings.config import Settings
 from store.base import Store
-import re
 
 settings = Settings.from_env()
 _MAX_RETRIES = settings.max_retries
