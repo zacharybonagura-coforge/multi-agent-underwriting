@@ -49,14 +49,15 @@ def _result(
 
 def _stub_pipeline(monkeypatch: pytest.MonkeyPatch, result: PipelineResult | None = None) -> list[dict[str, Any]]:
     ran: list[dict[str, Any]] = []
+
+    def fake_run(application: dict[str, Any], model: object, store: object, tracer: object) -> PipelineResult:
+        ran.append(application)
+        return result or _result()
+
     monkeypatch.setattr(cli, "build_model", lambda settings: object())
     monkeypatch.setattr(cli, "build_store", lambda settings: object())
     monkeypatch.setattr(cli, "configure_tracing", lambda: object())
-    monkeypatch.setattr(
-        cli,
-        "run",
-        lambda application, model, store, tracer: ran.append(application) or (result or _result()),
-    )
+    monkeypatch.setattr(cli, "run", fake_run)
     return ran
 
 

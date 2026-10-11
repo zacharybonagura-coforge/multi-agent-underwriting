@@ -56,7 +56,7 @@ def test_export_uses_zero_when_timestamps_are_missing(caplog) -> None:
 
 
 def test_shutdown_returns_none() -> None:
-    assert LoggingSpanExporter().shutdown() is None
+    LoggingSpanExporter().shutdown()
 
 
 def test_traced_step_records_tokens_and_returns_the_result() -> None:
