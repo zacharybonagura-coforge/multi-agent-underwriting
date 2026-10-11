@@ -12,17 +12,19 @@ import httpx
 from opentelemetry import trace
 
 from agents.enrichment import EnrichmentMessage, EnrichmentResult, enrichment_agent
-from agents.intake import IntakeResult, intake_agent
+from agents.intake import IntakeMessage, IntakeResult, intake_agent
 from agents.recommendation import RecommendationResult, recommendation_agent
 from agents.risk import RiskResult, risk_agent
 from model.base import Generation, ModelAdapter, ModelTimeoutError
 from observability import configure_tracing
 from settings.config import Settings
 from store.base import Store
+import re
 
 settings = Settings.from_env()
 _MAX_RETRIES = settings.max_retries
 _REVIEW_FILE = settings.reviews_path
+_EMAIL = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
 
 @dataclass(frozen=True)
 class PipelineResult:
@@ -83,6 +85,9 @@ def run(
         )
         if intake is None:
             return _review(_stop(), "intake failed after retries")
+        if _intake_failed(intake.message):
+            print("Intake failed. This application must go to human review.")
+            return _review(_stop(intake), "applicant_email is missing or invalid")
         enrich_input = _enrichment_input(intake)
         enrichment = _run_agent(
             tracer,
@@ -236,6 +241,7 @@ def _enrichment_input(intake: IntakeResult) -> dict[str, Any]:
     birth = message.date_of_birth.isoformat() if message.date_of_birth else None
     return {
         "applicant_name": message.applicant_name,
+        "applicant_email": message.applicant_email,
         "date_of_birth": birth,
         "address": message.address,
         "product": message.product,
@@ -268,6 +274,11 @@ def _final_decision(recommendation: RecommendationResult) -> str:
     if recommendation.message.decision is None:
         return "escalate"
     return recommendation.message.decision
+
+
+def _intake_failed(message: IntakeMessage) -> bool:
+    email = message.applicant_email
+    return email is None or _EMAIL.fullmatch(email) is None
 
 
 def _enrichment_failed(message: EnrichmentMessage) -> bool:

@@ -32,6 +32,7 @@ class FakeModel:
 def _application(**overrides: object) -> dict[str, object]:
     payload: dict[str, object] = {
         "applicant_name": "Ada Lovelace",
+        "applicant_email": "ada.lovelace@coforge.com",
         "date_of_birth": "1815-12-10",
         "address": "12 St James Square, London",
         "product": "auto",
@@ -45,6 +46,7 @@ def _application(**overrides: object) -> dict[str, object]:
 def test_intake_normalizes_a_complete_application() -> None:
     raw = {
         "applicant_name": "Ada Lovelace",
+        "applicant_email": "ada.lovelace@coforge.com",
         "date_of_birth": "1815-12-10",
         "address": "12 St James Square, London",
         "product": "AUTO",
@@ -55,6 +57,7 @@ def test_intake_normalizes_a_complete_application() -> None:
     result = intake_agent(raw, model)
 
     assert result.message.applicant_name == "Ada Lovelace"
+    assert result.message.applicant_email == "ada.lovelace@coforge.com"
     assert result.message.date_of_birth == date(1815, 12, 10)
     assert result.message.address == "12 St James Square, London"
     assert result.message.product == "auto"
@@ -108,7 +111,7 @@ def test_unusable_product_is_missing(product: object) -> None:
     assert result.missing_fields == ["product"]
 
 
-@pytest.mark.parametrize("field", ["applicant_name", "address"])
+@pytest.mark.parametrize("field", ["applicant_name", "applicant_email", "address"])
 @pytest.mark.parametrize("value", ["", "   "])
 def test_blank_text_is_missing(field: str, value: str) -> None:
     result = intake_agent({}, FakeModel(json.dumps(_application(**{field: value}))))

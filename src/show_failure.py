@@ -28,6 +28,7 @@ def main() -> None:
     result = run(
         {
             "applicant_name": "Ada Lovelace",
+            "applicant_email": "ada.lovelace@coforge.com",
             "date_of_birth": "1815-12-10",
             "address": "12 St James Square, London",
             "product": "AUTO",

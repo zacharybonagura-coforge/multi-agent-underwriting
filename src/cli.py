@@ -75,6 +75,9 @@ def read_request() -> dict[str, Any] | None:
     applicant_name = _ask("applicant_name")
     if applicant_name is None:
         return None
+    applicant_email = _ask("applicant_email")
+    if applicant_email is None:
+        return None
     date_of_birth = _ask("date_of_birth")
     if date_of_birth is None:
         return None
@@ -92,6 +95,7 @@ def read_request() -> dict[str, Any] | None:
         return None
     return {
         "applicant_name": _text(applicant_name),
+        "applicant_email": _text(applicant_email),
         "date_of_birth": _date(date_of_birth),
         "address": _text(address),
         "product": _product(product),

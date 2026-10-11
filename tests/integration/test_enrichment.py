@@ -14,6 +14,7 @@ def test_enrichment_copies_a_live_record() -> None:
     settings = Settings.from_env()
     lookup = {
         "applicant_name": "Ada Lovelace",
+        "applicant_email": "ada.lovelace@coforge.com",
         "date_of_birth": "1815-12-10",
         "address": "12 St James Square, London",
         "product": "auto",

@@ -42,7 +42,7 @@ class MemoryStore:
 def _store() -> MemoryStore:
     return MemoryStore([
         {
-            "applicant_name": "Ada Lovelace",
+            "applicant_email": "ada.lovelace@coforge.com",
             "product": "auto",
             "credit_file": "good",
             "claims": ["2019 collision"],
@@ -63,6 +63,7 @@ def _facts(**overrides: object) -> dict[str, object]:
 def _lookup(**overrides: object) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "applicant_name": "Ada Lovelace",
+        "applicant_email": "ada.lovelace@coforge.com",
         "date_of_birth": "1815-12-10",
         "address": "12 St James Square, London",
         "product": "auto",
@@ -74,25 +75,25 @@ def _lookup(**overrides: object) -> dict[str, Any]:
 
 def test_lookup_returns_the_matching_record() -> None:
     store = MemoryStore([
-        {"applicant_name": "Ada Lovelace", "product": "auto", "asset": "2018 Honda Civic"},
-        {"applicant_name": "Ada Lovelace", "product": "home", "asset": "brick house"},
+        {"applicant_email": "ada.lovelace@coforge.com", "product": "auto", "asset": "2018 Honda Civic"},
+        {"applicant_email": "ada.lovelace@coforge.com", "product": "home", "asset": "brick house"},
     ])
-    assert lookup_applicant("Ada Lovelace", "auto", store) == store.load()[0]
+    assert lookup_applicant("ada.lovelace@coforge.com", "auto", store) == store.load()[0]
 
 
 def test_lookup_returns_none_for_an_unknown_pair() -> None:
     store = MemoryStore([
-        {"applicant_name": "Ada Lovelace", "product": "auto", "asset": "2018 Honda Civic"},
+        {"applicant_email": "ada.lovelace@coforge.com", "product": "auto", "asset": "2018 Honda Civic"},
     ])
-    assert lookup_applicant("Ada Lovelace", "life", store) is None
+    assert lookup_applicant("ada.lovelace@coforge.com", "life", store) is None
 
 
-@pytest.mark.parametrize(("name", "product"), [(None, "auto"), ("Ada Lovelace", None)])
-def test_lookup_returns_none_without_a_key(name: str | None, product: str | None) -> None:
+@pytest.mark.parametrize(("email", "product"), [(None, "auto"), ("ada.lovelace@coforge.com", None)])
+def test_lookup_returns_none_without_a_key(email: str | None, product: str | None) -> None:
     store = MemoryStore([
-        {"applicant_name": "Ada Lovelace", "product": "auto", "asset": "2018 Honda Civic"},
+        {"applicant_email": "ada.lovelace@coforge.com", "product": "auto", "asset": "2018 Honda Civic"},
     ])
-    assert lookup_applicant(name, product, store) is None
+    assert lookup_applicant(email, product, store) is None
 
 
 def test_enrichment_reads_a_complete_reply() -> None:
@@ -114,7 +115,7 @@ def test_enrichment_puts_null_records_in_the_prompt_for_an_unknown_applicant() -
         prior_claims_count=None,
         asset_facts=None,
     )))
-    enrichment_agent(_lookup(applicant_name="Unknown Person"), model, _store())
+    enrichment_agent(_lookup(applicant_email="unknown@coforge.com"), model, _store())
     assert '"records": null' in model.prompts[0]
 
 

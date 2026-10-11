@@ -15,6 +15,7 @@ def test_intake_normalizes_a_live_application() -> None:
     """A slash date, a padded product, and extra cents come back normalized."""
     raw = {
         "applicant_name": "Ada Lovelace",
+        "applicant_email": "ada.lovelace@coforge.com",
         "date_of_birth": "1815/12/10",
         "address": "12 St James Square, London",
         "product": "  AUTO  ",
@@ -23,6 +24,7 @@ def test_intake_normalizes_a_live_application() -> None:
     }
     result = intake_agent(raw, build_model(Settings.from_env()))
     assert result.message.applicant_name == "Ada Lovelace"
+    assert result.message.applicant_email == "ada.lovelace@coforge.com"
     assert result.message.date_of_birth == date(1815, 12, 10)
     assert result.message.address == "12 St James Square, London"
     assert result.message.product == "auto"

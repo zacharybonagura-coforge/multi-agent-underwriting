@@ -14,6 +14,7 @@ Product = Literal["auto", "home", "life"]
 
 FIELDS = (
     "applicant_name",
+    "applicant_email",
     "date_of_birth",
     "address",
     "product",
@@ -25,13 +26,14 @@ class IntakeMessage(BaseModel):
     """Normalized application passed onward by the orchestrator."""
 
     applicant_name: str | None
+    applicant_email: str | None
     date_of_birth: date | None
     address: str | None
     product: Product | None
     coverage_amount: float | None
     stated_income: float | None
 
-    @field_validator("applicant_name", "address", mode="before")
+    @field_validator("applicant_name", "applicant_email", "address", mode="before")
     @classmethod
     def blank_to_null(cls, value: object) -> object:
         """Treat an empty string as a missing field."""
@@ -66,7 +68,6 @@ class IntakeResult:
     missing_fields: list[str]
     input_tokens: int
     output_tokens: int
-
 
 
 def intake_agent(raw_application: dict[str, Any], model: ModelAdapter) -> IntakeResult:

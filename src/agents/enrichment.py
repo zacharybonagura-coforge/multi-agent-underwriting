@@ -65,22 +65,22 @@ class EnrichmentResult:
 
 
 def lookup_applicant(
-    name: str | None,
+    email: str | None,
     product: str | None,
     store: Store
 ) -> dict[str, Any] | None:
-    """Return the stored record for this name and product."""
-    if name is None or product is None:
+    """Return the stored record for this email and product."""
+    if email is None or product is None:
         return None
     for record in store.load():
-        if record["applicant_name"] == name and record["product"] == product:
+        if record["applicant_email"] == email and record["product"] == product:
             return record
     return None
 
 
 def enrichment_agent(lookup: dict[str, Any], model: ModelAdapter, store: Store) -> EnrichmentResult:
     """Add credit, claims, and asset facts from the applicant store."""
-    records = lookup_applicant(lookup.get("applicant_name"), lookup.get("product"), store)
+    records = lookup_applicant(lookup.get("applicant_email"), lookup.get("product"), store)
     generation = model.generate(
         render_prompt("enrichment.v1.md", {**lookup, "records": records})
     )

@@ -34,6 +34,7 @@ Each agent returns only the section it computed. The orchestrator keeps those re
 ### Raw application
 
 - `applicant_name`
+- `applicant_email`
 - `date_of_birth`
 - `address`
 - `product` (`auto`, `home`, or `life`)
@@ -47,6 +48,7 @@ Reads the raw application.
 Produces:
 
 - `applicant_name`
+- `applicant_email`
 - `date_of_birth`
 - `address`
 - `product`
@@ -56,7 +58,7 @@ Produces:
 
 ### `enrichment_agent`
 
-Reads `applicant_name`, `date_of_birth`, `address`, `product`, and `missing_fields`. These are the lookup keys. Coverage and income are not used here.
+Reads `applicant_name`, `applicant_email`, `date_of_birth`, `address`, `product`, and `missing_fields`. These are the lookup keys. Coverage and income are not used here.
 
 Produces:
 
