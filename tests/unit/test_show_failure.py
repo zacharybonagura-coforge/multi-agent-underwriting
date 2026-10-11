@@ -1,15 +1,11 @@
 """Unit tests for the risk-timeout demo."""
 
 import json
-from pathlib import Path
 
 import pytest
 
-import pipeline
 import show_failure
 from model.base import Generation, ModelTimeoutError
-from observability import configure_tracing
-
 
 _INTAKE = json.dumps({
     "applicant_name": "Ada Lovelace",

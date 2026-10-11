@@ -1,7 +1,7 @@
 """Unit tests for the underwriting pipeline."""
 
 import json
-from datetime import date
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -10,8 +10,6 @@ import pytest
 import pipeline
 from model.base import Generation, ModelTimeoutError
 from observability import configure_tracing
-from collections.abc import Sequence
-from typing import Any
 
 _INTAKE = json.dumps({
     "applicant_name": "Ada Lovelace",
