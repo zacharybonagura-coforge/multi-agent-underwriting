@@ -18,6 +18,8 @@ from model.base import Generation, ModelAdapter, ModelTimeoutError
 from observability import configure_tracing
 
 
+MAX_RETRIES = 3
+
 @dataclass(frozen=True)
 class PipelineResult:
     """Results for one application."""
@@ -143,17 +145,16 @@ def _run_agent[ResultT: _TracedResult](
     call: Callable[[], ResultT],
     output_of: Callable[[ResultT], Any],
 ) -> ResultT | None:
-    """Call ``agent`` once, then once more with the error appended to the prompt."""
-    try:
-        return _traced_call(tracer, agent, received, call, output_of)
-    except _AGENT_ERRORS as exc:
-        model.remember(exc)
+    """Call ``agent`` once, then retry up to three times with the previous error appended."""
+    for attempt in range(MAX_RETRIES+1):
         try:
             return _traced_call(tracer, agent, received, call, output_of)
-        except _AGENT_ERRORS:
-            print(f"{agent} failed after one retry. This application must go to human review.")
-            return None
-
+        except _AGENT_ERRORS as exc:
+            if attempt == 3:
+                print(f"{agent} failed after 3 retries. This application must go to human review.")
+                return None
+            model.remember(exc)
+    return None
 
 def _traced_call[ResultT: _TracedResult](
     tracer: trace.Tracer,
