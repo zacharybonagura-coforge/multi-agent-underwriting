@@ -1,0 +1,32 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "InvokeRiskInferenceProfile",
+      "Effect": "Allow",
+      "Action": "bedrock:InvokeModel",
+      "Resource": "arn:aws:bedrock:REGION:ACCOUNT_ID:inference-profile/us.amazon.nova-micro-v1:0"
+    },
+    {
+      "Sid": "InvokeRiskFoundationModel",
+      "Effect": "Allow",
+      "Action": "bedrock:InvokeModel",
+      "Resource": [
+        "arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-micro-v1:0",
+        "arn:aws:bedrock:us-east-2::foundation-model/amazon.nova-micro-v1:0",
+        "arn:aws:bedrock:us-west-2::foundation-model/amazon.nova-micro-v1:0"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "bedrock:InferenceProfileArn": "arn:aws:bedrock:REGION:ACCOUNT_ID:inference-profile/us.amazon.nova-micro-v1:0"
+        }
+      }
+    },
+    {
+      "Sid": "ReadRiskInferenceProfile",
+      "Effect": "Allow",
+      "Action": "bedrock:GetInferenceProfile",
+      "Resource": "arn:aws:bedrock:REGION:ACCOUNT_ID:inference-profile/us.amazon.nova-micro-v1:0"
+    }
+  ]
+}

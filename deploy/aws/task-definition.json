@@ -1,0 +1,28 @@
+{
+  "family": "underwriting-risk-agent",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::ACCOUNT_ID:role/underwriting-risk-agent-task",
+  "containerDefinitions": [
+    {
+      "name": "risk-agent",
+      "image": "ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/underwriting-risk-agent:latest",
+      "essential": true,
+      "environment": [
+        {"name": "AWS_REGION", "value": "REGION"},
+        {"name": "BEDROCK_MODEL_ID", "value": "us.amazon.nova-micro-v1:0"}
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/underwriting-risk-agent",
+          "awslogs-region": "REGION",
+          "awslogs-stream-prefix": "risk"
+        }
+      }
+    }
+  ]
+}
