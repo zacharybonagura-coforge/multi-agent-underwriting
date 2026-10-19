@@ -27,4 +27,10 @@ def start_risk_task(case: dict) -> str:
             }]
         },
     )
-    return response["tasks"][0]["taskArn"]
+    tasks = response.get("tasks") or []
+    if not tasks:
+        raise RuntimeError(f"ECS did not start a task: {response.get('failures')}")
+    task_arn = tasks[0].get("taskArn")
+    if task_arn is None:
+        raise RuntimeError("ECS task is missing a task ARN")
+    return task_arn
